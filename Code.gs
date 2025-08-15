@@ -1,6 +1,6 @@
 function onOpen() {
   SpreadsheetApp.getUi()
-    .createMenu("Congress Tools")
+    .createMenu("Gavel Strike")
     .addItem("Calling Order", "showSidebar")
     .addToUi();
 }
