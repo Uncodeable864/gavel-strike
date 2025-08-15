@@ -1,190 +1,230 @@
 <!DOCTYPE html>
 <html>
-<head>
-  <base target="_top">
-  <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bulma@0.9.4/css/bulma.min.css">
-  <style>
-    body {
-      margin: 1.5rem;
-    }
-    .list-item:hover {
-  font-style: italic;
-  text-decoration: line-through;
-  cursor: pointer;
-}
-  </style>
-</head>
-<body>
+  <head>
+    <base target="_top" />
+    <link
+      rel="stylesheet"
+      href="https://cdn.jsdelivr.net/npm/bulma@0.9.4/css/bulma.min.css"
+    />
+    <style>
+      body {
+        margin: 1rem;
+      }
+      .list-item:hover {
+        font-style: italic;
+        text-decoration: line-through;
+        cursor: pointer;
+      }
+    </style>
+  </head>
+  <body>
+    <h1 class="title is-4 has-text-link mb-4">Calling Order</h1>
 
-<h1 class="title is-4 has-text-link mb-4">Calling Order</h1>
+    <!-- Mode Switch -->
+    <div class="buttons has-addons mb-4">
+      <button id="speakingBtn" class="button is-link">Speaking</button>
+      <button id="questioningBtn" class="button">Questioning</button>
+    </div>
 
-<!-- Mode Switch -->
-<div class="buttons has-addons mb-4">
-  <button id="speakingBtn" class="button is-link">Speaking</button>
-  <button id="questioningBtn" class="button">Questioning</button>
-</div>
-
-<!-- Mode Settings -->
-<details class="mb-4">
-  <summary class="has-text-weight-semibold">Mode settings</summary>
-  <div class="mt-2">
-    <div class="field">
-      <label class="label">Sheet Name:</label>
-      <div class="control">
-        <div class="select is-fullwidth">
-          <select id="sheetName"></select>
+    <!-- Mode Settings -->
+    <details class="mb-4">
+      <summary class="has-text-weight-semibold">Mode settings</summary>
+      <div class="mt-2">
+        <div class="field">
+          <label class="label">Sheet Name:</label>
+          <div class="control">
+            <div class="select is-fullwidth">
+              <select id="sheetName"></select>
+            </div>
+          </div>
+        </div>
+        <div class="field">
+          <label class="label">Range (A1):</label>
+          <div class="control">
+            <input
+              id="rangeA1"
+              class="input"
+              type="text"
+              placeholder="e.g., A1:C10"
+            />
+          </div>
         </div>
       </div>
+    </details>
+
+    <!-- Refresh & Status -->
+    <div class="field is-grouped is-align-items-center mb-2">
+      <p class="control">
+        <button id="refreshBtn" class="button is-link">Refresh</button>
+      </p>
+      <p id="status" class="has-text-link has-text-weight-bold">Refreshing</p>
+      <p id="clickStatus" class="has-text-warning has-text-weight-bold">
+        Processing
+      </p>
     </div>
-    <div class="field">
-      <label class="label">Range (A1):</label>
+
+    <div class="field mb-2">
       <div class="control">
-        <input id="rangeA1" class="input" type="text" placeholder="e.g., A1:C10">
+        <input
+          id="searchBox"
+          class="input"
+          type="text"
+          placeholder="Quick find"
+        />
       </div>
     </div>
-  </div>
-</details>
 
-<!-- Refresh & Status -->
-<div class="field is-grouped is-align-items-center mb-2">
-  <p class="control">
-    <button id="refreshBtn" class="button is-link">Refresh</button>
-  </p>
-  <p id="status" class="has-text-link has-text-weight-bold">Refreshing</p>
-  <p id="clickStatus" class="has-text-warning has-text-weight-bold">Processing</p>
-</div>
+    <!-- Order List -->
+    <ol id="orderList" class="pl-5" style="list-style: decimal"></ol>
 
-<!-- Order List -->
-<ol id="orderList" class="pl-5" style="list-style: decimal;"></ol>
-
-
-<script>
-  let mode = 'speaking';
-  let modeSettings = {
-    speaking: { sheetName: '', rangeA1: '' },
-    questioning: { sheetName: '', rangeA1: '' }
-  };
-  let cells = [];
-
-  document.getElementById('speakingBtn').addEventListener('click', () => switchMode('speaking'));
-  document.getElementById('questioningBtn').addEventListener('click', () => switchMode('questioning'));
-
-  document.getElementById('sheetName').addEventListener('change', saveSettings);
-  document.getElementById('rangeA1').addEventListener('input', saveSettings);
-
-  document.getElementById('refreshBtn').addEventListener('click', refreshOrder);
-
-  const statusEl = document.getElementById('status');
-  const clickStatus = document.getElementById('clickStatus');
-
-  statusEl.classList.add("is-hidden");
-  clickStatus.classList.add("is-hidden");
-
-  function switchMode(newMode) {
-    mode = newMode;
-
-    // Update button styles
-  document.getElementById('speakingBtn').className = mode === 'speaking'
-    ? 'button is-link'
-    : 'button is-light';
-  document.getElementById('questioningBtn').className = mode === 'questioning'
-    ? 'button is-link'
-    : 'button is-light';
-
-    // Set range box
-    document.getElementById('rangeA1').value = modeSettings[mode].rangeA1;
-    document.getElementById('sheetName').value = modeSettings[mode].sheetName;
-
-    refreshOrder();
-  }
-
-  function saveSettings() {
-    modeSettings[mode].sheetName = document.getElementById('sheetName').value;
-    modeSettings[mode].rangeA1 = document.getElementById('rangeA1').value;
-    refreshOrder();
-  }
-
-  function refreshOrder() {
-    console.log("REFRESH");
-    statusEl.classList.remove('is-hidden');
-    const sheetName = modeSettings[mode].sheetName;
-    const rangeA1 = modeSettings[mode].rangeA1;
-    if (!sheetName || !rangeA1) {
-      document.getElementById('orderList').innerHTML = '';
-      return;
-    }
-    google.script.run
-      .withSuccessHandler((order) => {
-         buildList(order);
-         statusEl.classList.add('is-hidden');
-      })
-      .getCallingOrder(rangeA1, sheetName); 
-  }
-
-function buildList(order) {
-  const ol = document.getElementById('orderList');
-  ol.innerHTML = '';
-  order.forEach(item => {
-    const li = document.createElement('li');
-    li.textContent = item.text;
-    li.className = 'list-item';
-
-    // Store metadata in data attributes
-    li.dataset.cellA1 = item.cell;
-    li.dataset.sheetName = item.sheetName;
-    li.dataset.row = item.row;
-    li.dataset.col = item.col;
-    li.dataset.rangeA1 = item.rangeA1;
-
-    li.addEventListener('click', e => {
-      clickStatus.classList.remove('is-hidden');
-      const meta = e.currentTarget.dataset;
-      const metadata = {
-        cellA1: meta.cellA1,
-        sheetName: meta.sheetName,
-        row: parseInt(meta.row),
-        col: parseInt(meta.col),
-        rangeA1: meta.rangeA1
+    <script>
+      let mode = "speaking";
+      let modeSettings = {
+        speaking: { sheetName: "", rangeA1: "" },
+        questioning: { sheetName: "", rangeA1: "" },
       };
-      console.log(metadata);
-      google.script.run.withSuccessHandler((o) => {
-        clickStatus.classList.add('is-hidden');
+      let cells = [];
+
+      document
+        .getElementById("speakingBtn")
+        .addEventListener("click", () => switchMode("speaking"));
+      document
+        .getElementById("questioningBtn")
+        .addEventListener("click", () => switchMode("questioning"));
+
+      document
+        .getElementById("sheetName")
+        .addEventListener("change", saveSettings);
+      document
+        .getElementById("rangeA1")
+        .addEventListener("input", saveSettings);
+
+      document
+        .getElementById("refreshBtn")
+        .addEventListener("click", refreshOrder);
+
+      const statusEl = document.getElementById("status");
+      const clickStatus = document.getElementById("clickStatus");
+      const search = document.getElementById("searchBox");
+      const ol = document.getElementById("orderList");
+
+      statusEl.classList.add("is-hidden");
+      clickStatus.classList.add("is-hidden");
+      search.addEventListener("input", () => {
+        const query = search.value.toLowerCase();
+        Array.from(ol.children).forEach((li) => {
+          const text = li.textContent.toLowerCase();
+          if (!text.includes(query)) li.classList.add("is-hidden");
+          else li.classList.remove("is-hidden");
+        });
+      });
+
+      function switchMode(newMode) {
+        mode = newMode;
+
+        // Update button styles
+        document.getElementById("speakingBtn").className =
+          mode === "speaking" ? "button is-link" : "button is-light";
+        document.getElementById("questioningBtn").className =
+          mode === "questioning" ? "button is-link" : "button is-light";
+
+        // Set range box
+        document.getElementById("rangeA1").value = modeSettings[mode].rangeA1;
+        document.getElementById("sheetName").value =
+          modeSettings[mode].sheetName;
+
         refreshOrder();
-        }).listItemClick(metadata);
-    });
-    ol.appendChild(li);
-  });
+      }
 
+      function saveSettings() {
+        modeSettings[mode].sheetName =
+          document.getElementById("sheetName").value;
+        modeSettings[mode].rangeA1 = document.getElementById("rangeA1").value;
+        refreshOrder();
+      }
 
-}
+      function refreshOrder() {
+        console.log("REFRESH");
+        statusEl.classList.remove("is-hidden");
+        const sheetName = modeSettings[mode].sheetName;
+        const rangeA1 = modeSettings[mode].rangeA1;
+        if (!sheetName || !rangeA1) {
+          document.getElementById("orderList").innerHTML = "";
+          return;
+        }
+        google.script.run
+          .withSuccessHandler((order) => {
+            buildList(order);
+            statusEl.classList.add("is-hidden");
+          })
+          .getCallingOrder(rangeA1, sheetName);
+      }
 
-  function populateSheetDropdown(sheets, selectedName) {
-    const select = document.getElementById('sheetName');
-    select.innerHTML = '';
+      function buildList(order) {
+        ol.innerHTML = "";
+        order.forEach((item) => {
+          const li = document.createElement("li");
+          li.textContent = item.text;
+          li.className = "list-item";
 
-    sheets.forEach(name => {
-      const option = document.createElement('option');
-      option.value = name;
-      option.textContent = name;
-      select.appendChild(option);
-    });
+          // Store metadata in data attributes
+          li.dataset.cellA1 = item.cell;
+          li.dataset.sheetName = item.sheetName;
+          li.dataset.row = item.row;
+          li.dataset.col = item.col;
+          li.dataset.rangeA1 = item.rangeA1;
 
-    // Pick selectedName if valid, otherwise default to first sheet
-    if (selectedName && sheets.includes(selectedName)) {
-      select.value = selectedName;
-    } else if (sheets.length > 0) {
-      select.value = sheets[0];
-      modeSettings[mode].sheetName = sheets[0];
-    }
-  }
+          li.addEventListener("click", (e) => {
+            clickStatus.classList.remove("is-hidden");
+            const meta = e.currentTarget.dataset;
+            const metadata = {
+              cellA1: meta.cellA1,
+              sheetName: meta.sheetName,
+              row: parseInt(meta.row),
+              col: parseInt(meta.col),
+              rangeA1: meta.rangeA1,
+            };
+            console.log(metadata);
+            google.script.run
+              .withSuccessHandler((o) => {
+                clickStatus.classList.add("is-hidden");
+                refreshOrder();
+              })
+              .listItemClick(metadata);
+          });
+          ol.appendChild(li);
+        });
+      }
 
-  // Initial load AFTER mode is set
-  switchMode('speaking');
+      function populateSheetDropdown(sheets, selectedName) {
+        const select = document.getElementById("sheetName");
+        select.innerHTML = "";
 
-  google.script.run
-    .withSuccessHandler((sheets) => populateSheetDropdown(sheets, " "))
-    .withFailureHandler((e) => {console.log(e)})
-    .getSheetNames();
-</script>
-</body>
+        sheets.forEach((name) => {
+          const option = document.createElement("option");
+          option.value = name;
+          option.textContent = name;
+          select.appendChild(option);
+        });
+
+        // Pick selectedName if valid, otherwise default to first sheet
+        if (selectedName && sheets.includes(selectedName)) {
+          select.value = selectedName;
+        } else if (sheets.length > 0) {
+          select.value = sheets[0];
+          modeSettings[mode].sheetName = sheets[0];
+        }
+      }
+
+      // Initial load AFTER mode is set
+      switchMode("speaking");
+
+      google.script.run
+        .withSuccessHandler((sheets) => populateSheetDropdown(sheets, " "))
+        .withFailureHandler((e) => {
+          console.log(e);
+        })
+        .getSheetNames();
+    </script>
+  </body>
 </html>
