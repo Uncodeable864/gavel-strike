@@ -24,4 +24,5 @@ These steps must be repeated for every PO sheet, unless you copy from a master d
 2. In the `Code.gs` file, paste the contents of [this file](https://raw.githubusercontent.com/Uncodeable864/gavel-strike/refs/heads/main/Code.gs). 
 3. Create a new file called `call-order.html`, and paste the contents of [this file](https://raw.githubusercontent.com/Uncodeable864/gavel-strike/refs/heads/main/call-order.html).
 4. For the first launch only: Navigate back to `Code.gs` and push run.
-5. Navigate back to your sheet, and there should be a tab called *Gavel Strike*! Be sure NOT to close the Apps Script tab — or Gavel Strike will stop working.
+5. Navigate back to your sheet, and there should be a tab called *Gavel Strike*! At this point, you may close the tab called "Apps Script".
+6. Gavel Strike is now installed for this sheet only. There is no need to reinstall when opening the sheet again, and any copies of the sheet will also have Gavel Strike.
