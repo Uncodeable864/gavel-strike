@@ -102,7 +102,7 @@ function listItemClick(metadata) {
   const absCol = startCol + metadata.col - 1;
 
   if (metadata.blackout) sheet.getRange(absRow, absCol).setBackground("#000000");
-  else cell.setFontLine('line-through');
+  else sheet.getRange(absRow, absCol).setFontLine('line-through');
 
   // Determine next column
   const nextCol = absCol + 1;

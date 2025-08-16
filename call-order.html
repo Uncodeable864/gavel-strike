@@ -21,7 +21,7 @@
     <h1 class="title is-4 has-text-link mb-4">Calling Order</h1>
 
     <!-- Mode Switch -->
-    <div class="buttons has-addons mb-4">
+    <div class="buttons has-addons mb-4 is-fullwidth">
       <button id="speakingBtn" class="button is-link">Speaking</button>
       <button id="questioningBtn" class="button">Questioning</button>
     </div>
@@ -56,7 +56,9 @@
             class="switch is-rounded is-info"
             checked
           />
-          <label for="blackoutToggle">Strikeout-blackout Switch</label>
+          <label for="blackoutToggle"
+            >Blackout names, instead of strikeout</label
+          >
         </div>
       </div>
     </details>
@@ -64,7 +66,7 @@
     <!-- Refresh & Status -->
     <div class="field is-grouped is-align-items-center mb-2">
       <p class="control">
-        <button id="refreshBtn" class="button is-link">Refresh</button>
+        <button id="refreshBtn" class="button is-light">Refresh</button>
       </p>
       <p id="status" class="has-text-link has-text-weight-bold">Refreshing</p>
       <p id="clickStatus" class="has-text-warning has-text-weight-bold">
@@ -125,7 +127,8 @@
       statusEl.classList.add("is-hidden");
       clickStatus.classList.add("is-hidden");
       document.getElementById("searchBox").addEventListener("input", () => {
-        const query = search.value.toLowerCase();
+        console.log("hi!!");
+        const query = document.getElementById("searchBox").value.toLowerCase();
         Array.from(ol.children).forEach((li) => {
           const text = li.textContent.toLowerCase();
           if (!text.includes(query)) li.classList.add("is-hidden");
@@ -229,9 +232,7 @@
           select.value = selectedName;
         } else if (sheets.length > 0) {
           select.value = sheets[0];
-          Array.from(modeSettings).forEach((m) => {
-            m.sheetName = sheets[0];
-          });
+          modeSettings[mode].sheetName = sheets[0];
         }
       }
 
