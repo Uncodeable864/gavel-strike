@@ -49,6 +49,15 @@
             />
           </div>
         </div>
+        <div class="field">
+          <input
+            id="blackoutToggle"
+            type="checkbox"
+            class="switch is-rounded is-info"
+            checked
+          />
+          <label for="blackoutToggle">Strikeout-blackout Switch</label>
+        </div>
       </div>
     </details>
 
@@ -80,8 +89,8 @@
     <script>
       let mode = "speaking";
       let modeSettings = {
-        speaking: { sheetName: "", rangeA1: "" },
-        questioning: { sheetName: "", rangeA1: "" },
+        speaking: { sheetName: "", rangeA1: "", blackout: true },
+        questioning: { sheetName: "", rangeA1: "", blackout: true },
       };
       let cells = [];
 
@@ -103,14 +112,19 @@
         .getElementById("refreshBtn")
         .addEventListener("click", refreshOrder);
 
+      document
+        .getElementById("blackoutToggle")
+        .addEventListener("change", function () {
+          modeSettings[mode].blackout = this.checked;
+        });
+
       const statusEl = document.getElementById("status");
       const clickStatus = document.getElementById("clickStatus");
-      const search = document.getElementById("searchBox");
       const ol = document.getElementById("orderList");
 
       statusEl.classList.add("is-hidden");
       clickStatus.classList.add("is-hidden");
-      search.addEventListener("input", () => {
+      document.getElementById("searchBox").addEventListener("input", () => {
         const query = search.value.toLowerCase();
         Array.from(ol.children).forEach((li) => {
           const text = li.textContent.toLowerCase();
@@ -127,6 +141,8 @@
           mode === "speaking" ? "button is-link" : "button is-light";
         document.getElementById("questioningBtn").className =
           mode === "questioning" ? "button is-link" : "button is-light";
+        document.getElementById("blackoutToggle").checked =
+          modeSettings[mode].blackout;
 
         // Set range box
         document.getElementById("rangeA1").value = modeSettings[mode].rangeA1;
@@ -183,6 +199,7 @@
               row: parseInt(meta.row),
               col: parseInt(meta.col),
               rangeA1: meta.rangeA1,
+              blackout: modeSettings[mode].blackout,
             };
             console.log(metadata);
             google.script.run
@@ -212,7 +229,9 @@
           select.value = selectedName;
         } else if (sheets.length > 0) {
           select.value = sheets[0];
-          modeSettings[mode].sheetName = sheets[0];
+          Array.from(modeSettings).forEach((m) => {
+            m.sheetName = sheets[0];
+          });
         }
       }
 

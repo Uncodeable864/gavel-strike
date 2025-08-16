@@ -9,7 +9,6 @@ function showSidebar() {
   var html = HtmlService.createTemplateFromFile("call-order")
     .evaluate()
     .setTitle("Calling Order")
-    .setSandboxMode(HtmlService.SandboxMode.NATIVE);  // <-- force NATIVE
   SpreadsheetApp.getUi().showSidebar(html);
 }
 
@@ -44,7 +43,7 @@ function getCallingOrder(rangeA1, sheetName) {
   }
 
   for (let col = 0; col < numCols; col++) {
-    if (!values[0][col]) continue; // skip column if first cell empty
+    if (!values[0][col]) continue;
 
     for (let row = 0; row < numRows; row++) {
       const value = values[row][col];
@@ -63,7 +62,7 @@ function getCallingOrder(rangeA1, sheetName) {
         text: value,
         cell: cellRef,
         sheetName,
-        row: row + 1,
+        row: row + 1, // Spreadsheet start from one, not zero
         col: col + 1,
         rangeA1
       });
@@ -89,8 +88,7 @@ function columnToLetter(col) {
  * "Click" action for a list item
  */
 function listItemClick(metadata) {
-  const ss = SpreadsheetApp.getActiveSpreadsheet();
-  const sheet = ss.getSheetByName(metadata.sheetName);
+  const sheet = SpreadsheetApp.getActiveSpreadsheet().getSheetByName(metadata.sheetName);
   if (!sheet) return false;
 
   const range = sheet.getRange(metadata.rangeA1);
@@ -99,12 +97,12 @@ function listItemClick(metadata) {
   const endRow = range.getLastRow();
   const endCol = range.getLastColumn();
 
-  // Absolute coordinates of original cell
+  // Absolute coordinates of original cell. Subtract by one because of different counting systems :)
   const absRow = startRow + metadata.row - 1;
   const absCol = startCol + metadata.col - 1;
 
-  // Black out original cell
-  sheet.getRange(absRow, absCol).setBackground("#000000");
+  if (metadata.blackout) sheet.getRange(absRow, absCol).setBackground("#000000");
+  else cell.setFontLine('line-through');
 
   // Determine next column
   const nextCol = absCol + 1;
