@@ -127,7 +127,6 @@
       statusEl.classList.add("is-hidden");
       clickStatus.classList.add("is-hidden");
       document.getElementById("searchBox").addEventListener("input", () => {
-        console.log("hi!!");
         const query = document.getElementById("searchBox").value.toLowerCase();
         Array.from(ol.children).forEach((li) => {
           const text = li.textContent.toLowerCase();
@@ -163,7 +162,6 @@
       }
 
       function refreshOrder() {
-        console.log("REFRESH");
         statusEl.classList.remove("is-hidden");
         const sheetName = modeSettings[mode].sheetName;
         const rangeA1 = modeSettings[mode].rangeA1;
@@ -204,7 +202,6 @@
               rangeA1: meta.rangeA1,
               blackout: modeSettings[mode].blackout,
             };
-            console.log(metadata);
             google.script.run
               .withSuccessHandler((o) => {
                 clickStatus.classList.add("is-hidden");
@@ -242,7 +239,7 @@
       google.script.run
         .withSuccessHandler((sheets) => populateSheetDropdown(sheets, " "))
         .withFailureHandler((e) => {
-          console.log(e);
+          console.error(e);
         })
         .getSheetNames();
     </script>
