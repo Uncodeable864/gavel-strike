@@ -11,6 +11,7 @@ This tool creates a standardized "calling order" that collapses precedency and r
 
 ### Usage
 **To Open Calling Order:** Go to *Gavel Strike* → *Calling Order*.
+
 **To Call A Speaker**: Click on the name of the speaker in the list. After a few moments, the list will be reordered.
 
 ### Installation
