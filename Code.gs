@@ -1,7 +1,7 @@
 function onOpen() {
   SpreadsheetApp.getUi()
     .createMenu("Gavel Strike")
-    .addItem("Calling Order", "showSidebar")
+    .addItem("Open calling order", "showSidebar")
     .addToUi();
 }
 

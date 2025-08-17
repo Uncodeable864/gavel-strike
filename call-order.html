@@ -6,14 +6,35 @@
       rel="stylesheet"
       href="https://cdn.jsdelivr.net/npm/bulma@0.9.4/css/bulma.min.css"
     />
+    <!-- Google Fonts -->
+    <link
+      href="https://fonts.googleapis.com/css2?family=Inter:wght@400;600&family=Dela+Gothic+One&family=Carrois+Gothic+SC&display=swap"
+      rel="stylesheet"
+    />
+
     <style>
       body {
-        margin: 1rem;
+        margin: 0.5rem;
+        font-family: "Inter", sans-serif;
       }
       .list-item:hover {
-        font-style: italic;
         text-decoration: line-through;
         cursor: pointer;
+      }
+      html {
+        font-family: "Inter", sans-serif;
+      }
+      #modeSettingsDiv {
+        border: 1px solid #ddd; /* light grey border */
+        border-top: none; /* remove top border */
+        border-right: none;
+        border-radius: 0 0 0 10px; /* only curve bottom corners */
+        padding: 1rem; /* breathing room inside */
+        margin-bottom: 1rem; /* space from other sections */
+      }
+
+      .title {
+        font-family: "Dela Gothic One", serif;
       }
     </style>
   </head>
@@ -29,7 +50,7 @@
     <!-- Mode Settings -->
     <details class="mb-4">
       <summary class="has-text-weight-semibold">Mode settings</summary>
-      <div class="mt-2">
+      <div class="mt-2" id="modeSettingsDiv">
         <div class="field">
           <label class="label">Sheet Name:</label>
           <div class="control">
@@ -127,6 +148,7 @@
       statusEl.classList.add("is-hidden");
       clickStatus.classList.add("is-hidden");
       document.getElementById("searchBox").addEventListener("input", () => {
+        console.log("hi!!");
         const query = document.getElementById("searchBox").value.toLowerCase();
         Array.from(ol.children).forEach((li) => {
           const text = li.textContent.toLowerCase();
@@ -162,6 +184,7 @@
       }
 
       function refreshOrder() {
+        console.log("REFRESH");
         statusEl.classList.remove("is-hidden");
         const sheetName = modeSettings[mode].sheetName;
         const rangeA1 = modeSettings[mode].rangeA1;
@@ -202,6 +225,7 @@
               rangeA1: meta.rangeA1,
               blackout: modeSettings[mode].blackout,
             };
+            console.log(metadata);
             google.script.run
               .withSuccessHandler((o) => {
                 clickStatus.classList.add("is-hidden");
@@ -239,7 +263,7 @@
       google.script.run
         .withSuccessHandler((sheets) => populateSheetDropdown(sheets, " "))
         .withFailureHandler((e) => {
-          console.error(e);
+          console.log(e);
         })
         .getSheetNames();
     </script>
